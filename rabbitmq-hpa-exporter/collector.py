@@ -4,8 +4,8 @@ class RabbitmqHpaCollector(object):
   def __init__(self, config):
     self.rabbitUrl = "https://{config['broker']['user']}:{config['broker']['password']}@{config['broker']['url']}/api/queues"
     self.gauge = GaugeMetricFamily("rabbitmqHpaScaleFactor", 
-    	                             "Scale factor for rabbitmq celery worker HPA",
-    	                             labels=['queue'])
+                                   "Scale factor for rabbitmq celery worker HPA",
+                                   labels=['queue'])
 
   def getStats(self):
 
