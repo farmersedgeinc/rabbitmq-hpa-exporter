@@ -1,0 +1,2 @@
+## rabbitmq-hpa-exporter
+The purpose of this repo is to calculate more linearized worker scaling factors for RabbitMQ/Celery based queue architectures for use with Kubernetes Horizontal Pod Autoscaler.

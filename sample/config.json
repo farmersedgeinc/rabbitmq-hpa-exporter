@@ -1,0 +1,12 @@
+{
+  "period": 1,
+  "port": 8000,
+  "broker": {
+  	"url": "broker.domain.com",
+  	"user": "user",
+  	"password": "password"
+  },
+  "celery": {
+  	"app": "app"
+  }
+}
