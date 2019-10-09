@@ -2,11 +2,29 @@
   "period": 1,
   "port": 8000,
   "broker": {
-    "url": "broker.domain.com",
+    "host": "broker.domain.com",
     "user": "user",
     "password": "password"
   },
   "celery": {
+    "module": "module",
     "app": "app"
+  },
+  "queues": {
+    "queue1": {
+      "scaleUpThreshold": 1.5,
+      "scaleDownThreshold": 0.5,
+      "scaleAmount": 5
+    },
+    "queue2": {
+      "scaleUpThreshold": 1.2,
+      "scaleDownThreshold": 0.4,
+      "scaleAmount": 1
+    },
+    "queue3": {
+      "scaleUpThreshold": 1.3,
+      "scaleDownThreshold": 0.7,
+      "scaleAmount": 
+    }
   }
 }
