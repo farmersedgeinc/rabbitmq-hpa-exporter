@@ -4,7 +4,7 @@ import subprocess, requests, json
 class RabbitmqHpaCollector(object):
   def __init__(self, config):
     self.celery = getattr(__import__(config["celery"]["module"], fromlist=[config["celery"]["app"]]), config["celery"]["app"])
-  	self.config = config
+    self.config = config
     self.data = {}
     self.scaleFactor = GaugeMetricFamily("rabbitmqHpaScaleFactor", 
                                          "Scale factor for rabbitmq celery worker HPA",
