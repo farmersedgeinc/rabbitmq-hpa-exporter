@@ -16,7 +16,7 @@ class RabbitmqHpaCollector(object):
                                          "Ratio of publish rate to acknowledgement rate",
                                          labels=['queue'])
 
-  def getData():
+  def getData(self):
     i = self.celery.control.inspect()
     queues = i.active_queues()
     stats = i.stats()
@@ -51,7 +51,7 @@ class RabbitmqHpaCollector(object):
         self.data[q]["ratio"] = 1
       self.data[q]["busyness"] = (self.data[q]["reserved"]+self.data[q]["active"])/(self.data[q]["prefetch"]+self.data[q]["concurrency"])
 
-  def collect():
+  def collect(self):
     self.getData()
 
     for q in self.data:
