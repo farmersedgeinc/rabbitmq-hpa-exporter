@@ -17,7 +17,7 @@ class RabbitmqHpaCollector(object):
                                          labels=['queue'])
 
   def getData():
-    i = self.celery.inspect()
+    i = self.celery.control.inspect()
     queues = i.active_queues()
     stats = i.stats()
     active = i.active()
