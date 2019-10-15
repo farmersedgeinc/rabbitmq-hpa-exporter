@@ -23,7 +23,7 @@ class RabbitmqHpaCollector(object):
     active = i.active()
     reserved = i.reserved()
 
-    rabbitStats = json.loads(requests.get("https://{}:{}@{}/api/queues".format(config["broker"]["user"], config["broker"]["pass"], config["broker"]["host"])).content)
+    rabbitStats = json.loads(requests.get("https://{}:{}@{}/api/queues".format(self.config["broker"]["user"], self.config["broker"]["pass"], self.config["broker"]["host"])).content)
 
     self.data = {}
 
