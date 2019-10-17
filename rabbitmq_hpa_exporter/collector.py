@@ -25,8 +25,8 @@ class RabbitmqHpaCollector(object):
 
     rabbitStats = json.loads(requests.get("https://{}:{}@{}/api/queues".format(self.config["broker"]["user"], self.config["broker"]["password"], self.config["broker"]["host"])).content)
 
+    print("Resetting and collecting data...")
     self.data = {}
-
 
     for key in queues:
       name = queues[key][0]["name"]

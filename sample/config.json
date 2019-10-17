@@ -24,7 +24,7 @@
     "queue3": {
       "scaleUpThreshold": 1.3,
       "scaleDownThreshold": 0.7,
-      "scaleAmount": 
+      "scaleAmount": 2
     }
   }
 }
