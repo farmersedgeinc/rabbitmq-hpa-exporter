@@ -8,5 +8,3 @@ def start():
     config = json.loads(config.read())
     start_http_server(config["port"])
     REGISTRY.register(RabbitmqHpaCollector(config))
-    while True:
-      time.sleep(config["period"])
