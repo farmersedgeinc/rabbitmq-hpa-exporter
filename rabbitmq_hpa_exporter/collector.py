@@ -1,20 +1,10 @@
-from prometheus_client.core import GaugeMetricFamily
-import subprocess, requests, json
+import subprocess, requests, json, metrics
 
 class RabbitmqHpaCollector(object):
   def __init__(self, config):
     self.celery = getattr(__import__(config["celery"]["module"], fromlist=[config["celery"]["app"]]), config["celery"]["app"])
     self.config = config
     self.data = {}
-    self.scaleFactor = GaugeMetricFamily("rabbitmqHpaScaleFactor", 
-                                         "Scale factor for rabbitmq celery worker HPA",
-                                         labels=['queue'])
-    self.workerBusyness = GaugeMetricFamily("celeryWorkerBusyness",
-                                            "Celery worker busyness from 0 to 1",
-                                            labels=['queue'])
-    self.pubAckRatio = GaugeMetricFamily("rabbitMqPublishAcknowledgementRatio",
-                                         "Ratio of publish rate to acknowledgement rate",
-                                         labels=['queue'])
 
   def getData(self):
     i = self.celery.control.inspect()
@@ -53,8 +43,8 @@ class RabbitmqHpaCollector(object):
     self.getData()
 
     for q in self.data:
-      self.workerBusyness.add_metric([q], self.data[q]["busyness"])
-      self.pubAckRatio.add_metric([q], self.data[q]["ratio"])
+      metrics.workerBusyness.labels(q).set(self.data[q]["busyness"])
+      metrics.pubAckRatio.labels(q).set(self.data[q]["ratio"])
 
-    yield self.workerBusyness
-    yield self.pubAckRatio
+    yield metrics.workerBusyness
+    yield metrics.pubAckRatio

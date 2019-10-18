@@ -1,1 +1,1 @@
-import collector, server
+import collector, server, metrics
