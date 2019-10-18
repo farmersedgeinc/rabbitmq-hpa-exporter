@@ -1,11 +1,11 @@
-from prometheus_client.core import Gauge
+from prometheus_client.core import GaugeMetricFamily
 
-scaleFactor = Gauge("rabbitmqHpaScaleFactor", 
+scaleFactor = GaugeMetricFamily("rabbitmqHpaScaleFactor", 
                     "Scale factor for rabbitmq celery worker HPA",
                     ['queue'])
-workerBusyness = Gauge("celeryWorkerBusyness",
+workerBusyness = GaugeMetricFamily("celeryWorkerBusyness",
                        "Celery worker busyness from 0 to 1",
                        ['queue'])
-pubAckRatio = Gauge("rabbitMqPublishAcknowledgementRatio",
+pubAckRatio = GaugeMetricFamily("rabbitMqPublishAcknowledgementRatio",
                     "Ratio of publish rate to acknowledgement rate",
                     ['queue'])
