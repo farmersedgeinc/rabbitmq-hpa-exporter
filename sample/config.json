@@ -1,5 +1,4 @@
 {
-  "period": 1,
   "port": 8000,
   "broker": {
     "host": "broker.domain.com",
