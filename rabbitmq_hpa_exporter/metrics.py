@@ -5,7 +5,7 @@ scaleFactor = Gauge("rabbitmq_hpa_scale_factor",
                     ['queue'])
 workerBusyness = Gauge("celery_worker_busyness",
                        "Celery worker busyness from 0 to 1",
-                       labels=['queue'])
+                       ['queue'])
 pubAckRatio = Gauge("rabbitmq_publish_acknowledgement_ratio",
                     "Ratio of publish rate to acknowledgement rate",
-                    labels=['queue'])
+                    ['queue'])

@@ -9,4 +9,4 @@ def start():
     start_http_server(config["port"])
     REGISTRY.register(RabbitmqHpaCollector(config))
     while True:
-      time.sleep(1)
+      time.sleep(config["period"])
