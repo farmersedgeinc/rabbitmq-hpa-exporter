@@ -5,8 +5,10 @@ from collector import RabbitmqHpaCollector
 
 def start():
   with open(os.environ.get('RABBITMQ_HPA_EXPORTER_CONFIG')) as config:
+  	collector = RabbitmqHpaCollector(config)
     config = json.loads(config.read())
     start_http_server(config["port"])
-    REGISTRY.register(RabbitmqHpaCollector(config))
+    REGISTRY.register(collector)
     while True:
-    	time.sleep(1)
+      collector.getData()
+      time.sleep(5)
