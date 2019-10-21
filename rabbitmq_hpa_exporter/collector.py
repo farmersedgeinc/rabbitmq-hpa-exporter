@@ -7,6 +7,7 @@ class RabbitmqHpaCollector(object):
     self.data = {}
 
   def getData(self):
+    print("collecting new data")
     tempData = {}
 
     i = self.celery.control.inspect()
