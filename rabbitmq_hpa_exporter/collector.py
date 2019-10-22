@@ -47,9 +47,15 @@ class RabbitmqHpaCollector(object):
 
   def collect(self):
     self.logger.debug("\nCOLLECT CALLED, CURRENT VALUES: - {}\n".format(self.data))
+    workerBusyness = GaugeMetricFamily("celery_worker_busyness",
+                                       "Celery worker busyness from 0 to 1",
+                                       labels=['queue'])
+    pubAckRatio = GaugeMetricFamily("rabbitmq_publish_acknowledgement_ratio",
+                                    "Ratio of publish rate to acknowledgement rate",
+                                    labels=['queue'])
     for q in self.data:
-      metrics.workerBusyness.add_metric(labels=[q], value=self.data[q]["busyness"])
-      metrics.pubAckRatio.add_metric(labels=[q], value=self.data[q]["ratio"])
+      workerBusyness.add_metric(labels=[q], value=self.data[q]["busyness"])
+      pubAckRatio.add_metric(labels=[q], value=self.data[q]["ratio"])
     self.logger.debug("\nBUSYNESS: {}".format(metrics.workerBusyness))
     yield metrics.workerBusyness
     yield metrics.pubAckRatio
