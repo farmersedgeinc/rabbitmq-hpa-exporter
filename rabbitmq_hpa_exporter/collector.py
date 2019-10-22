@@ -47,11 +47,9 @@ class RabbitmqHpaCollector(object):
     self.data = tempData
 
   def collect(self):
-    self.logger.debug("\nCOLLECT CALLED, CURRENT VALUES: - {}\n".format(self.data))
     metrics = getMetrics()
     for q in self.data:
       for kind in metrics:
         metrics[kind].add_metric(labels=[q], value=self.data[q][kind])
-    self.logger.debug("\nBUSYNESS: {}".format(workerBusyness))
     for kind in metrics:
       yield metrics[kind]
