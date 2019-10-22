@@ -11,4 +11,4 @@ def start():
     start_http_server(config["port"], registry=REGISTRY)
     while True:
       collector.calculate()
-      time.sleep(30)
+      time.sleep(10)

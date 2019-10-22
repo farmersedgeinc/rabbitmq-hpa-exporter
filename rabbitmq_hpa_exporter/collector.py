@@ -1,9 +1,12 @@
-import subprocess, requests, json, metrics
+import subprocess, requests, json, metrics, logging
 
 class RabbitmqHpaCollector(object):
   def __init__(self, config):
     self.config = config
     self.data = {}
+    self.logger = logging.getLogger("hpa-exporter-logger")
+    self.logger.setLevel(logging.DEBUG)
+    self.logger.addHandler(logging.StreamHandler(sys.stdout))
 
   def calculate(self):
     celery = getattr(__import__(self.config["celery"]["module"], fromlist=[self.config["celery"]["app"]]), self.config["celery"]["app"])
@@ -41,6 +44,7 @@ class RabbitmqHpaCollector(object):
       tempData[q]["busyness"] = (tempData[q]["reserved"]+tempData[q]["active"])/(tempData[q]["prefetch"]+tempData[q]["concurrency"])
 
     self.data = tempData
+    self.logger.debug("NEW VALUES CALCULATED - {}".format(self.data))
 
   def collect(self):
     for q in self.data:
