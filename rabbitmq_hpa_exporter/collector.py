@@ -1,8 +1,9 @@
 import subprocess, requests, json, metrics, logging, sys
-from prometheus_client.core import GaugeMetricFamily
+from metrics import getMetrics
 
 class RabbitmqHpaCollector(object):
   def __init__(self, config):
+    self.celery = getattr(__import__(config["celery"]["module"], fromlist=[config["celery"]["app"]]), config["celery"]["app"])    
     self.config = config
     self.data = {}
     self.logger = logging.getLogger("hpa-exporter-logger")
@@ -10,10 +11,9 @@ class RabbitmqHpaCollector(object):
     self.logger.addHandler(logging.StreamHandler(sys.stdout))
 
   def calculate(self):
-    celery = getattr(__import__(self.config["celery"]["module"], fromlist=[self.config["celery"]["app"]]), self.config["celery"]["app"])
     tempData = {}
 
-    i = celery.control.inspect()
+    i = self.celery.control.inspect()
     queues = i.active_queues()
     stats = i.stats()
     active = i.active()
@@ -39,24 +39,19 @@ class RabbitmqHpaCollector(object):
 
     for q in tempData:
       try:
-        tempData[q]["ratio"] = tempData[q]["publish"]/tempData[q]["acknowledge"]
+        tempData[q]["rabbitmq_publish_acknowledgement_ratio"] = tempData[q]["publish"]/tempData[q]["acknowledge"]
       except:
-        tempData[q]["ratio"] = 1
-      tempData[q]["busyness"] = (tempData[q]["reserved"]+tempData[q]["active"])/(tempData[q]["prefetch"]+tempData[q]["concurrency"])
+        tempData[q]["rabbitmq_publish_acknowledgement_ratio"] = 0
+      tempData[q]["celery_worker_busyness"] = (tempData[q]["reserved"]+tempData[q]["active"])/(tempData[q]["prefetch"]+tempData[q]["concurrency"])
 
     self.data = tempData
 
   def collect(self):
     self.logger.debug("\nCOLLECT CALLED, CURRENT VALUES: - {}\n".format(self.data))
-    workerBusyness = GaugeMetricFamily("celery_worker_busyness",
-                                       "Celery worker busyness from 0 to 1",
-                                       labels=['queue'])
-    pubAckRatio = GaugeMetricFamily("rabbitmq_publish_acknowledgement_ratio",
-                                    "Ratio of publish rate to acknowledgement rate",
-                                    labels=['queue'])
+    metrics = getMetrics()
     for q in self.data:
-      workerBusyness.add_metric(labels=[q], value=self.data[q]["busyness"])
-      pubAckRatio.add_metric(labels=[q], value=self.data[q]["ratio"])
+      for kind in metrics:
+        metrics[kind].add_metric(labels=[q], value=self.data[q][kind])
     self.logger.debug("\nBUSYNESS: {}".format(workerBusyness))
-    yield workerBusyness
-    yield pubAckRatio
+    for kind in metrics:
+      yield metrics[kind]
