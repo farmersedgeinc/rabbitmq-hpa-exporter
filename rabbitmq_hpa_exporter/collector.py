@@ -46,10 +46,10 @@ class RabbitmqHpaCollector(object):
     self.data = tempData
 
   def collect(self):
-    self.logger.debug("COLLECT CALLED, CURRENT VALUES: - {}".format(self.data))
+    self.logger.debug("\nCOLLECT CALLED, CURRENT VALUES: - {}\n".format(self.data))
     for q in self.data:
       metrics.workerBusyness.add_metric(labels=[q], value=self.data[q]["busyness"])
       metrics.pubAckRatio.add_metric(labels=[q], value=self.data[q]["ratio"])
-
+    self.logger.debug("\nBUSYNESS: {}".format(matrics.workerBusyness))
     yield metrics.workerBusyness
     yield metrics.pubAckRatio
