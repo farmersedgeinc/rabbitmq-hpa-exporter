@@ -1,4 +1,4 @@
-import subprocess, requests, json, metrics, logging
+import subprocess, requests, json, metrics, logging, sys
 
 class RabbitmqHpaCollector(object):
   def __init__(self, config):
