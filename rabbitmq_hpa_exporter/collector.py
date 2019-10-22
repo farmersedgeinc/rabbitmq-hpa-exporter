@@ -2,15 +2,14 @@ import subprocess, requests, json, metrics
 
 class RabbitmqHpaCollector(object):
   def __init__(self, config):
-    self.celery = getattr(__import__(config["celery"]["module"], fromlist=[config["celery"]["app"]]), config["celery"]["app"])
     self.config = config
     self.data = {}
 
   def getData(self):
-    print("collecting new data")
+    celery = getattr(__import__(self.config["celery"]["module"], fromlist=[self.config["celery"]["app"]]), self.config["celery"]["app"])
     tempData = {}
 
-    i = self.celery.control.inspect()
+    i = celery.control.inspect()
     queues = i.active_queues()
     stats = i.stats()
     active = i.active()
