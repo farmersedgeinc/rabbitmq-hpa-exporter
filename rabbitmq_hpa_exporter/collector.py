@@ -56,6 +56,6 @@ class RabbitmqHpaCollector(object):
     for q in self.data:
       workerBusyness.add_metric(labels=[q], value=self.data[q]["busyness"])
       pubAckRatio.add_metric(labels=[q], value=self.data[q]["ratio"])
-    self.logger.debug("\nBUSYNESS: {}".format(metrics.workerBusyness))
+    self.logger.debug("\nBUSYNESS: {}".format(workerBusyness))
     yield metrics.workerBusyness
     yield metrics.pubAckRatio
