@@ -5,7 +5,7 @@ class RabbitmqHpaCollector(object):
     self.config = config
     self.data = {}
 
-  def getData(self):
+  def calculate(self):
     celery = getattr(__import__(self.config["celery"]["module"], fromlist=[self.config["celery"]["app"]]), self.config["celery"]["app"])
     tempData = {}
 
@@ -44,8 +44,8 @@ class RabbitmqHpaCollector(object):
 
   def collect(self):
     for q in self.data:
-      metrics.workerBusyness.add_metric([q], self.data[q]["busyness"])
-      metrics.pubAckRatio.add_metric([q], self.data[q]["ratio"])
+      metrics.workerBusyness.labels(queue=q).set(self.data[q]["busyness"])
+      metrics.pubAckRatio.labels(queue=q).set(self.data[q]["ratio"])
 
     yield metrics.workerBusyness
     yield metrics.pubAckRatio
