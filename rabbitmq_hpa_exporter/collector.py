@@ -44,9 +44,9 @@ class RabbitmqHpaCollector(object):
       tempData[q]["busyness"] = (tempData[q]["reserved"]+tempData[q]["active"])/(tempData[q]["prefetch"]+tempData[q]["concurrency"])
 
     self.data = tempData
-    self.logger.debug("NEW VALUES CALCULATED - {}".format(self.data))
 
   def collect(self):
+    self.logger.debug("COLLECT CALLED, CURRENT VALUES: - {}".format(self.data))
     for q in self.data:
       metrics.workerBusyness.add_metric(labels=[q], value=self.data[q]["busyness"])
       metrics.pubAckRatio.add_metric(labels=[q], value=self.data[q]["ratio"])
