@@ -1,4 +1,5 @@
 import subprocess, requests, json, metrics, logging, sys
+from prometheus_client.core import GaugeMetricFamily
 
 class RabbitmqHpaCollector(object):
   def __init__(self, config):
