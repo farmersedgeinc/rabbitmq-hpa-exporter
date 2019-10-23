@@ -1,5 +1,4 @@
 import subprocess, requests, json, metrics, logging, sys
-from metrics import getMetrics
 
 class RabbitmqHpaCollector(object):
   def __init__(self, config):
@@ -47,10 +46,10 @@ class RabbitmqHpaCollector(object):
     self.data = tempData
 
   def collect(self):
-    metrics = getMetrics()
+    m = metrics.getMetrics()
     self.logger.debug("METRICS: ".format(metrics))
     for q in self.data:
-      for kind in metrics:
-        metrics[kind].add_metric(labels=[q], value=self.data[q][kind])
-    for kind in metrics:
-      yield metrics[kind]
+      for kind in m:
+        m[kind].add_metric(labels=[q], value=self.data[q][kind])
+    for kind in m:
+      yield m[kind]
