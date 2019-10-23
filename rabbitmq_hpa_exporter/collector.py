@@ -47,7 +47,7 @@ class RabbitmqHpaCollector(object):
 
   def collect(self):
     m = metrics.getMetrics()
-    self.logger.debug("METRICS: ".format(metrics))
+    self.logger.debug("METRICS: ".format(m))
     for q in self.data:
       for kind in m:
         m[kind].add_metric(labels=[q], value=self.data[q][kind])
