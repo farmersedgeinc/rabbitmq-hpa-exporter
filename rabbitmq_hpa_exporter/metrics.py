@@ -1,7 +1,7 @@
 from prometheus_client.core import GaugeMetricFamily
 
 def getMetrics():
-  return {
+  d = {
     "rabbitmq_hpa_scale_factor": GaugeMetricFamily("rabbitmq_hpa_scale_factor", 
                                                    "Scale factor for rabbitmq celery worker HPA",
                                                    labels=['queue']),
@@ -12,3 +12,4 @@ def getMetrics():
                                                                 "Ratio of publish rate to acknowledgement rate",
                                                                 labels=['queue'])
   }
+  return d
