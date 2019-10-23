@@ -49,7 +49,7 @@ class RabbitmqHpaCollector(object):
     m = metrics.getMetrics()
     for q in self.data:
       for kind in m:
-        if kind in data[q].keys():
+        if kind in self.data[q].keys():
           m[kind].add_metric(labels=[q], value=self.data[q][kind])
     for kind in m:
       yield m[kind]
