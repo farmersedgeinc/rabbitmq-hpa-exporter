@@ -1,6 +1,6 @@
 from prometheus_client.core import GaugeMetricFamily
 
-def getMetrics(logger):
+def getMetrics():
   return {
     "rabbitmq_hpa_scale_factor": GaugeMetricFamily("rabbitmq_hpa_scale_factor", 
                                                    "Scale factor for rabbitmq celery worker HPA",
