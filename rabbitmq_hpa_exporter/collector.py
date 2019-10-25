@@ -6,6 +6,7 @@ class RabbitmqHpaCollector(object):
     self.rabbitmq = {
       "host": "{}/api/queues".format(config["broker"]["user"], config["broker"]["password"], config["broker"]["host"]),
       "auth": (config["broker"]["user"],config["broker"]["password"])
+    }
     self.prometheus = {
       "host": "{}:/api/v1/query".format(config["prometheus"]["host"]),
       "auth": (config["prometheus"]["user"],config["prometheus"]["password"])
