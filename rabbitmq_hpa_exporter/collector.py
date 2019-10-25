@@ -42,7 +42,7 @@ class RabbitmqHpaCollector(object):
         if d.get("message_stats", {}).get("ack_details", None) != None:
           tempData[d["name"]]["acknowledge"] = d["message_stats"]["ack_details"]["rate"]
           tempData[d["name"]]["publish"] = d["message_stats"]["publish_details"]["rate"]
-        tempData[d["name"]]["consumers"] = d["consumers"]
+        tempData[d["name"]]["consumers"] = float(d["consumers"])
 
     for r in avgRatio["data"]["result"]:
       tempData[r["metric"]["queue"]]["avgRatio"] = r["value"][1]
