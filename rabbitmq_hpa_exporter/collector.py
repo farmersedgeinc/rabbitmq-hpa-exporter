@@ -3,10 +3,12 @@ import subprocess, requests, json, metrics, sys
 class RabbitmqHpaCollector(object):
   def __init__(self, config):
     self.celery = getattr(__import__(config["celery"]["module"], fromlist=[config["celery"]["app"]]), config["celery"]["app"])
-    self.rabbitmq = "{}:{}@{}/api/queues".format(config["broker"]["user"], config["broker"]["password"], config["broker"]["host"])
+    self.rabbitmq = {
+      "host": "{}/api/queues".format(config["broker"]["user"], config["broker"]["password"], config["broker"]["host"]),
+      "auth": (config["broker"]["user"],config["broker"]["password"])
     self.prometheus = {
       "host": "{}:/api/v1/query".format(config["prometheus"]["host"]),
-      "auth": (config["broker"]["user"],config["broker"]["password"])
+      "auth": (config["prometheus"]["user"],config["prometheus"]["password"])
     }
     self.config = config
     self.data = {}
@@ -20,7 +22,7 @@ class RabbitmqHpaCollector(object):
     active = i.active()
     reserved = i.reserved()
 
-    rabbitStats = json.loads(requests.get(self.rabbitmq).content)
+    rabbitStats = json.loads(requests.get(self.rabbitmq["host"], auth=self.rabbitmq["auth"]).content)
 
     avgRatio = json.loads(requests.get(self.prometheus["host"], auth=self.prometheus["auth"], params={"query": "avg_over_time(rabbitmq_publish_acknowledgement_ratio{}[5m])"}).content)
     avgBusyness = json.loads(requests.get(self.prometheus["host"], auth=self.prometheus["auth"], params={"query": "avg_over_time(celery_worker_busyness{}[5m])"}).content)
