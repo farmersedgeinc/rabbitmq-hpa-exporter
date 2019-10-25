@@ -22,8 +22,8 @@ class RabbitmqHpaCollector(object):
 
     rabbitStats = json.loads(requests.get(self.rabbitmq).content)
 
-    avgRatio = json.loads(requests.get(self.prometheus["host"], auth=self.prometheus["auth"], params{"query": "avg_over_time(rabbitmq_publish_acknowledgement_ratio{}[5m])"}).content)
-    avgBusyness = json.loads(requests.get(self.prometheus["host"], auth=self.prometheus["auth"], params{"query": "avg_over_time(celery_worker_busyness{}[5m])"}).content)
+    avgRatio = json.loads(requests.get(self.prometheus["host"], auth=self.prometheus["auth"], params={"query": "avg_over_time(rabbitmq_publish_acknowledgement_ratio{}[5m])"}).content)
+    avgBusyness = json.loads(requests.get(self.prometheus["host"], auth=self.prometheus["auth"], params={"query": "avg_over_time(celery_worker_busyness{}[5m])"}).content)
 
     for key in queues:
       name = queues[key][0]["name"]
