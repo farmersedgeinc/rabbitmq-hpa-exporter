@@ -30,6 +30,8 @@ class RabbitmqHpaCollector(object):
 
     for key in queues:
       name = queues[key][0]["name"]
+      if "celery@" in name:
+        continue
       if name not in tempData.keys():
         tempData[name] = {"reserved": 0.0, "active": 0.0, "prefetch": 0.0, "concurrency": 0.0, "publish": 0, "acknowledge": 0, "consumers": None}
       tempData[name]["active"] += len(active[key])
