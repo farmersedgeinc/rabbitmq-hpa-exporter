@@ -5,11 +5,11 @@ class RabbitmqHpaCollector(object):
     self.celery = getattr(__import__(config["celery"]["module"], fromlist=[config["celery"]["app"]]), config["celery"]["app"])
     self.rabbitmq = {
       "host": "{}/api/queues".format(config["broker"]["host"]),
-      "auth": (config["broker"]["user"],config["broker"]["password"])
+      "auth": (config["broker"].get("user", "user"),config["broker"].get("password", "pass"))
     }
     self.prometheus = {
-      "host": "{}:/api/v1/query".format(config["prometheus"]["host"]),
-      "auth": (config["prometheus"]["user"],config["prometheus"]["password"])
+      "host": "{}/api/v1/query".format(config["prometheus"]["host"]),
+      "auth": (config["prometheus"].get("user", "user"),config["prometheus"].get("password", "pass"))
     }
     self.config = config
     self.data = {}
