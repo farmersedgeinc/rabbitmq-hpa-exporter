@@ -1,7 +1,12 @@
 {
   "port": 8000,
+  "prometheus": {
+    "host": "http://prometheus.domain.com",
+    "user": "user",
+    "password": "password"
+  },
   "broker": {
-    "host": "broker.domain.com",
+    "host": "https://broker.domain.com",
     "user": "user",
     "password": "password"
   },
