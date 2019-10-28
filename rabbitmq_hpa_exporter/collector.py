@@ -64,6 +64,8 @@ class RabbitmqHpaCollector(object):
       if tempData[q].get("avgRatio", 1) > self.config.get("queues", {}).get(q, {}).get("scaleUpThreshold", 2) and tempData[q]["consumers"] != None:
         tempData[q]["rabbitmq_hpa_scale_factor"] = (tempData[q]["consumers"]+self.config.get("queues", {}).get(q, {}).get("scaleAmount", 1))/tempData[q]["consumers"]
       elif tempData[q].get("avgBusyness", 1) < self.config.get("queues", {}).get(q, {}).get("scaleDownThreshold", 0.5) and tempData[q]["consumers"] != None:
+        if q == "weather_current":
+          logger.debug("consumers: {}\nscaleAmount:{}\nresult: {}".format(tempData[q]["consumers"], self.config.get("queues", {}).get(q, {}).get("scaleAmount", 1), (tempData[q]["consumers"]-self.config.get("queues", {}).get(q, {}).get("scaleAmount", 1))/tempData[q]["consumers"]))
         tempData[q]["rabbitmq_hpa_scale_factor"] = (tempData[q]["consumers"]-self.config.get("queues", {}).get(q, {}).get("scaleAmount", 1))/tempData[q]["consumers"]
       else:
         tempData[q]["rabbitmq_hpa_scale_factor"] = 1
@@ -72,7 +74,6 @@ class RabbitmqHpaCollector(object):
 
   def collect(self):
     m = metrics.getMetrics()
-    self.logger.debug(self.data)
 
     for q in self.data:
       for kind in m:
