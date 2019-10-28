@@ -56,6 +56,8 @@ class RabbitmqHpaCollector(object):
       tempData[r["metric"]["queue"]]["avgBusyness"] = r["value"][1]
 
     for q in tempData:
+      if q == "weather_current":
+        self.logger.debug("ratio: {}\nbusyness: {}\ndown: {}\nup: {}".format(tempData[q].get("avgRatio", 1), tempData[q].get("avgBusyness", 1), self.config.get("queues", {}).get(q, {}).get("scaleDownThreshold", 0.5), self.config.get("queues", {}).get(q, {}).get("scaleUpThreshold", 0.5)))
       try:
         tempData[q]["rabbitmq_publish_acknowledgement_ratio"] = tempData[q]["publish"]/tempData[q]["acknowledge"]
       except:
@@ -65,7 +67,7 @@ class RabbitmqHpaCollector(object):
         tempData[q]["rabbitmq_hpa_scale_factor"] = (tempData[q]["consumers"]+self.config.get("queues", {}).get(q, {}).get("scaleAmount", 1))/tempData[q]["consumers"]
       elif tempData[q].get("avgBusyness", 1) < self.config.get("queues", {}).get(q, {}).get("scaleDownThreshold", 0.5) and tempData[q]["consumers"] != None:
         if q == "weather_current":
-          logger.debug("consumers: {}\nscaleAmount:{}\nresult: {}".format(tempData[q]["consumers"], self.config.get("queues", {}).get(q, {}).get("scaleAmount", 1), (tempData[q]["consumers"]-self.config.get("queues", {}).get(q, {}).get("scaleAmount", 1))/tempData[q]["consumers"]))
+          self.logger.debug("consumers: {}\nscaleAmount:{}\nresult: {}".format(tempData[q]["consumers"], self.config.get("queues", {}).get(q, {}).get("scaleAmount", 1), (tempData[q]["consumers"]-self.config.get("queues", {}).get(q, {}).get("scaleAmount", 1))/tempData[q]["consumers"]))
         tempData[q]["rabbitmq_hpa_scale_factor"] = (tempData[q]["consumers"]-self.config.get("queues", {}).get(q, {}).get("scaleAmount", 1))/tempData[q]["consumers"]
       else:
         tempData[q]["rabbitmq_hpa_scale_factor"] = 1
