@@ -59,7 +59,7 @@ class RabbitmqHpaCollector(object):
       try:
         tempData[q]["rabbitmq_publish_acknowledgement_ratio"] = tempData[q]["publish"]/tempData[q]["acknowledge"]
       except:
-        tempData[q]["rabbitmq_publish_acknowledgement_ratio"] = 0
+        tempData[q]["rabbitmq_publish_acknowledgement_ratio"] = 1
       tempData[q]["celery_worker_busyness"] = (tempData[q]["reserved"]+tempData[q]["active"])/(tempData[q]["prefetch"]+tempData[q]["concurrency"])
       if tempData[q].get("avgRatio", 1) > self.config.get("queues", {}).get(q, {}).get("scaleUpThreshold", 2) and tempData[q]["consumers"] != None:
         tempData[q]["rabbitmq_hpa_scale_factor"] = (tempData[q]["consumers"]+self.config.get("queues", {}).get(q, {}).get("scaleAmount", 1))/tempData[q]["consumers"]
