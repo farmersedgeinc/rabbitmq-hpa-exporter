@@ -1,4 +1,4 @@
-import subprocess, requests, json, metrics, sys
+import subprocess, requests, json, metrics, sys, logging
 
 class RabbitmqHpaCollector(object):
   def __init__(self, config):
@@ -13,6 +13,9 @@ class RabbitmqHpaCollector(object):
     }
     self.config = config
     self.data = {}
+    self.logger = logging.getLogger("rabbitmq-hpa-exporter")
+    self.logger.addHandler(logging.StreamHandler(sys.stdout))
+    self.logger.setLevel(logging.DEBUG)
 
   def calculate(self):
     tempData = {}
@@ -65,11 +68,11 @@ class RabbitmqHpaCollector(object):
       else:
         tempData[q]["rabbitmq_hpa_scale_factor"] = 1
 
-
     self.data = tempData
 
   def collect(self):
     m = metrics.getMetrics()
+    self.logger.debug(self.data)
 
     for q in self.data:
       for kind in m:
