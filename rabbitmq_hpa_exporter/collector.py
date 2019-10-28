@@ -30,14 +30,15 @@ class RabbitmqHpaCollector(object):
 
     for key in queues:
       name = queues[key][0]["name"]
-      if "celery@" in name:
-        continue
       if name not in tempData.keys():
         tempData[name] = {"reserved": 0.0, "active": 0.0, "prefetch": 0.0, "concurrency": 0.0, "publish": 0, "acknowledge": 0, "consumers": None}
-      tempData[name]["active"] += len(active[key])
-      tempData[name]["reserved"] += len(reserved[key])
-      tempData[name]["prefetch"] += stats[key]["prefetch_count"]
-      tempData[name]["concurrency"] += stats[key]["pool"]["max-concurrency"]
+      try:
+        tempData[name]["active"] += len(active[key])
+        tempData[name]["reserved"] += len(reserved[key])
+        tempData[name]["prefetch"] += stats[key]["prefetch_count"]
+        tempData[name]["concurrency"] += stats[key]["pool"]["max-concurrency"]
+      except:
+        del tempData[name]
 
     for d in rabbitStats:
       if d["name"] in tempData.keys():
