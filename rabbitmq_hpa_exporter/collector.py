@@ -58,6 +58,7 @@ class RabbitmqHpaCollector(object):
     for q in tempData:
       if q == "weather_current":
         self.logger.debug("ratio: {}\nbusyness: {}\ndown: {}\nup: {}".format(tempData[q].get("avgRatio", 1), tempData[q].get("avgBusyness", 1), self.config.get("queues", {}).get(q, {}).get("scaleDownThreshold", 0.5), self.config.get("queues", {}).get(q, {}).get("scaleUpThreshold", 2)))
+        self.logger.debug("{} AND {}".format(tempData[q].get("avgRatio", 1) > self.config.get("queues", {}).get(q, {}).get("scaleUpThreshold", 2), tempData[q]["consumers"] != None))
       try:
         tempData[q]["rabbitmq_publish_acknowledgement_ratio"] = tempData[q]["publish"]/tempData[q]["acknowledge"]
       except:
