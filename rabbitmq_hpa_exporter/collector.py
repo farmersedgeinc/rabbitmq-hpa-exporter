@@ -1,4 +1,5 @@
 import subprocess, requests, json, metrics, sys, logging
+from decimal import *
 
 class RabbitmqHpaCollector(object):
   def __init__(self, config):
@@ -34,7 +35,7 @@ class RabbitmqHpaCollector(object):
     for key in queues:
       name = queues[key][0]["name"]
       if name not in tempData.keys():
-        tempData[name] = {"reserved": 0.0, "active": 0.0, "prefetch": 0.0, "concurrency": 0.0, "publish": 0, "acknowledge": 0, "consumers": None}
+        tempData[name] = {"reserved": Decimal(0), "active": Decimal(0), "prefetch": Decimal(0), "concurrency": Decimal(0), "consumers": None}
       try:
         tempData[name]["active"] += len(active[key])
         tempData[name]["reserved"] += len(reserved[key])
@@ -46,14 +47,14 @@ class RabbitmqHpaCollector(object):
     for d in rabbitStats:
       if d["name"] in tempData.keys():
         if d.get("message_stats", {}).get("ack_details", None) != None:
-          tempData[d["name"]]["acknowledge"] = d["message_stats"]["ack_details"]["rate"]
-          tempData[d["name"]]["publish"] = d["message_stats"]["publish_details"]["rate"]
-        tempData[d["name"]]["consumers"] = float(d["consumers"])
+          tempData[d["name"]]["acknowledge"] = Decimal(d["message_stats"]["ack_details"]["rate"])
+          tempData[d["name"]]["publish"] = Decimal(d["message_stats"]["publish_details"]["rate"])
+        tempData[d["name"]]["consumers"] = Decimal(d["consumers"])
 
     for r in avgRatio["data"]["result"]:
-      tempData[r["metric"]["queue"]]["avgRatio"] = r["value"][1]
+      tempData[r["metric"]["queue"]]["avgRatio"] = Decimal(r["value"][1])
     for r in avgBusyness["data"]["result"]:
-      tempData[r["metric"]["queue"]]["avgBusyness"] = r["value"][1]
+      tempData[r["metric"]["queue"]]["avgBusyness"] = Decimal(r["value"][1])
 
     for q in tempData:
       if q == "weather_current":
