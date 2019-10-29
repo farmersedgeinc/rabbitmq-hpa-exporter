@@ -46,9 +46,11 @@ class RabbitmqHpaCollector(object):
 
     for d in rabbitStats:
       if d["name"] in tempData.keys():
-        tempData[d["name"]]["utilisation"] = d.get("consumer_utilisation", 1)
+        try:
+          tempData[d["name"]]["utilisation"] = Decimal(d["consumer_utilisation"])
+        except:
+          tempData[d["name"]]["utilisation"] = Decimal(1)
         tempData[d["name"]]["consumers"] = Decimal(d["consumers"])
-        self.logger.debug("UTIL: {}".format(tempData[d["name"]]["utilisation"]))
 
     for r in avgRestriction["data"]["result"]:
       tempData[r["metric"]["queue"]]["avgRestriction"] = Decimal(r["value"][1])
