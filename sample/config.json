@@ -16,17 +16,17 @@
   },
   "queues": {
     "queue1": {
-      "scaleUpThreshold": 1.5,
+      "scaleUpThreshold": 0.2,
       "scaleDownThreshold": 0.5,
       "scaleAmount": 5
     },
     "queue2": {
-      "scaleUpThreshold": 1.2,
+      "scaleUpThreshold": 0.3,
       "scaleDownThreshold": 0.4,
       "scaleAmount": 1
     },
     "queue3": {
-      "scaleUpThreshold": 1.3,
+      "scaleUpThreshold": 0.5,
       "scaleDownThreshold": 0.7,
       "scaleAmount": 2
     }
