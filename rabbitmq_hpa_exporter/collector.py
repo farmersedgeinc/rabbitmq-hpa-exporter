@@ -46,8 +46,9 @@ class RabbitmqHpaCollector(object):
 
     for d in rabbitStats:
       if d["name"] in tempData.keys():
-        tempData[d["name"]]["utilisation"] = d.get("consumer_utilisation", 1)  
+        tempData[d["name"]]["utilisation"] = d.get("consumer_utilisation", 1)
         tempData[d["name"]]["consumers"] = Decimal(d["consumers"])
+        self.logger.debug("UTIL: {}".format(tempData[d["name"]]["utilisation"]))
 
     for r in avgRestriction["data"]["result"]:
       tempData[r["metric"]["queue"]]["avgRestriction"] = Decimal(r["value"][1])
@@ -56,7 +57,7 @@ class RabbitmqHpaCollector(object):
 
     for q in tempData:
       try:
-        tempData[q]["rabbitmq_consumer_restriction"] = Decimal(1)-tempData[q]["utlization"]
+        tempData[q]["rabbitmq_consumer_restriction"] = Decimal(1)-tempData[q]["utilisation"]
       except:
         tempData[q]["rabbitmq_consumer_restriction"] = Decimal(0)
       tempData[q]["celery_worker_busyness"] = (tempData[q]["reserved"]+tempData[q]["active"])/(tempData[q]["prefetch"]+tempData[q]["concurrency"])
