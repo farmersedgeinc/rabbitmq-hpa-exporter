@@ -1,6 +1,8 @@
 import subprocess, requests, json, metrics, sys, logging
 from decimal import *
 
+filters = ["celeryev.", "celery@", "amq.gen"]
+
 class RabbitmqHpaCollector(object):
   def __init__(self, config):
     self.celery = getattr(__import__(config["celery"]["module"], fromlist=[config["celery"]["app"]]), config["celery"]["app"])
@@ -19,8 +21,6 @@ class RabbitmqHpaCollector(object):
     self.logger.setLevel(logging.DEBUG)
 
   def calculate(self):
-    tempData = {}
-
     i = self.celery.control.inspect()
     queues = i.active_queues()
     stats = i.stats()
@@ -32,45 +32,40 @@ class RabbitmqHpaCollector(object):
     avgRestriction = json.loads(requests.get(self.prometheus["host"], auth=self.prometheus["auth"], params={"query": "avg_over_time(rabbitmq_consumer_restriction{}[2m])"}).content)
     avgBusyness = json.loads(requests.get(self.prometheus["host"], auth=self.prometheus["auth"], params={"query": "avg_over_time(celery_worker_busyness{}[2m])"}).content)
 
+    for d in rabbitStats:
+      name = d["name"]
+      if not any(f in name for f in filters):
+        self.data[name] = {"reserved": Decimal(0), "active": Decimal(0), "prefetch": Decimal(0), "concurrency": Decimal(0)}
+        try:
+          self.data[name]["utilisation"] = Decimal(d["consumer_utilisation"])
+        except:
+          self.data[name]["utilisation"] = Decimal(1)
+        self.data[name]["consumers"] = Decimal(d["consumers"])
+
     for key in queues:
       name = queues[key][0]["name"]
-      if name not in tempData.keys():
-        tempData[name] = {"reserved": Decimal(0), "active": Decimal(0), "prefetch": Decimal(0), "concurrency": Decimal(0), "consumers": None}
-      try:
-        tempData[name]["active"] += len(active[key])
-        tempData[name]["reserved"] += len(reserved[key])
-        tempData[name]["prefetch"] += stats[key]["prefetch_count"]
-        tempData[name]["concurrency"] += stats[key]["pool"]["max-concurrency"]
-      except:
-        del tempData[name]
-
-    for d in rabbitStats:
-      if d["name"] in tempData.keys():
-        try:
-          tempData[d["name"]]["utilisation"] = Decimal(d["consumer_utilisation"])
-        except:
-          tempData[d["name"]]["utilisation"] = Decimal(1)
-        tempData[d["name"]]["consumers"] = Decimal(d["consumers"])
+      self.data[name]["active"] += len(active[key])
+      self.data[name]["reserved"] += len(reserved[key])
+      self.data[name]["prefetch"] += stats[key]["prefetch_count"]
+      self.data[name]["concurrency"] += stats[key]["pool"]["max-concurrency"]
 
     for r in avgRestriction["data"]["result"]:
-      tempData[r["metric"]["queue"]]["avgRestriction"] = Decimal(r["value"][1])
+      self.data[r["metric"]["queue"]]["avgRestriction"] = Decimal(r["value"][1])
     for r in avgBusyness["data"]["result"]:
-      tempData[r["metric"]["queue"]]["avgBusyness"] = Decimal(r["value"][1])
+      self.data[r["metric"]["queue"]]["avgBusyness"] = Decimal(r["value"][1])
 
-    for q in tempData:
+    for q in self.data:
       try:
-        tempData[q]["rabbitmq_consumer_restriction"] = Decimal(1)-tempData[q]["utilisation"]
+        self.data[q]["rabbitmq_consumer_restriction"] = Decimal(1)-self.data[q]["utilisation"]
       except:
-        tempData[q]["rabbitmq_consumer_restriction"] = Decimal(0)
-      tempData[q]["celery_worker_busyness"] = (tempData[q]["reserved"]+tempData[q]["active"])/(tempData[q]["prefetch"]+tempData[q]["concurrency"])
-      if (tempData[q].get("avgRestriction", Decimal(1)) > self.config.get("queues", {}).get(q, {}).get("scaleUpThreshold", Decimal(0.3))) and tempData[q]["consumers"] != None:
-        tempData[q]["rabbitmq_hpa_scale_factor"] = (tempData[q]["consumers"]+self.config.get("queues", {}).get(q, {}).get("scaleAmount", 1))/tempData[q]["consumers"]
-      elif (tempData[q].get("avgBusyness", Decimal(1)) < self.config.get("queues", {}).get(q, {}).get("scaleDownThreshold", Decimal(0.5))) and tempData[q]["consumers"] != None:
-        tempData[q]["rabbitmq_hpa_scale_factor"] = (tempData[q]["consumers"]-self.config.get("queues", {}).get(q, {}).get("scaleAmount", 1))/tempData[q]["consumers"]
+        self.data[q]["rabbitmq_consumer_restriction"] = Decimal(0)
+      self.data[q]["celery_worker_busyness"] = (self.data[q]["reserved"]+self.data[q]["active"])/(self.data[q]["prefetch"]+self.data[q]["concurrency"])
+      if (self.data[q].get("avgRestriction", Decimal(1)) > self.config.get("queues", {}).get(q, {}).get("scaleUpThreshold", Decimal(0.3))) and self.data[q]["consumers"] != None:
+        self.data[q]["rabbitmq_hpa_scale_factor"] = (self.data[q]["consumers"]+self.config.get("queues", {}).get(q, {}).get("scaleAmount", 1))/self.data[q]["consumers"]
+      elif (self.data[q].get("avgBusyness", Decimal(1)) < self.config.get("queues", {}).get(q, {}).get("scaleDownThreshold", Decimal(0.5))) and self.data[q]["consumers"] != None:
+        self.data[q]["rabbitmq_hpa_scale_factor"] = (self.data[q]["consumers"]-self.config.get("queues", {}).get(q, {}).get("scaleAmount", 1))/self.data[q]["consumers"]
       else:
-        tempData[q]["rabbitmq_hpa_scale_factor"] = Decimal(1)
-
-    self.data = tempData
+        self.data[q]["rabbitmq_hpa_scale_factor"] = Decimal(1)
 
   def collect(self):
     m = metrics.getMetrics()
