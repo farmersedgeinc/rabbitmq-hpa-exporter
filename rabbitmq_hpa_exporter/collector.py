@@ -65,10 +65,12 @@ class RabbitmqHpaCollector(object):
         for k in ["active", "reserved", "prefetch", "concurrency"]:
           del self.data[name][k]
 
-    for r in avgRestriction["data"]["result"] if r["metric"]["queue"] in self.data:
-      self.data[r["metric"]["queue"]]["avgRestriction"] = Decimal(r["value"][1])
-    for r in avgBusyness["data"]["result"] if r["metric"]["queue"] in self.data:
-      self.data[r["metric"]["queue"]]["avgBusyness"] = Decimal(r["value"][1])
+    for r in avgRestriction["data"]["result"]:
+      if r["metric"]["queue"] in self.data:
+        self.data[r["metric"]["queue"]]["avgRestriction"] = Decimal(r["value"][1])
+    for r in avgBusyness["data"]["result"]:
+      if r["metric"]["queue"] in self.data:
+        self.data[r["metric"]["queue"]]["avgBusyness"] = Decimal(r["value"][1])
 
     for q in self.data:
       try:
