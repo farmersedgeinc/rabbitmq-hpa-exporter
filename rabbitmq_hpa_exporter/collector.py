@@ -30,6 +30,7 @@ class RabbitmqHpaCollector(object):
     self.logger.setLevel(logging.DEBUG)
 
   def calculate(self):
+    qs = []
     i = self.celery.control.inspect()
     queues = i.active_queues()
     stats = i.stats()
@@ -44,12 +45,15 @@ class RabbitmqHpaCollector(object):
     for d in rabbitStats:
       name = d["name"]
       if not any(f in name for f in filters):
+        qs.append(name)
         self.data[name] = {"reserved": Decimal(0), "active": Decimal(0), "prefetch": Decimal(0), "concurrency": Decimal(0)}
         try:
           self.data[name]["utilisation"] = Decimal(d["consumer_utilisation"])
         except:
           self.data[name]["utilisation"] = Decimal(1)
         self.data[name]["consumers"] = Decimal(d["consumers"])
+
+    self.logger.debug("QUEUES: {}".format(qs))
 
     for key in queues:
       name = queues[key][0]["name"]
