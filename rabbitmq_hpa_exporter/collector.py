@@ -75,7 +75,10 @@ class RabbitmqHpaCollector(object):
         self.data[q]["rabbitmq_consumer_restriction"] = Decimal(1)-self.data[q]["utilisation"]
       except:
         self.data[q]["rabbitmq_consumer_restriction"] = Decimal(0)
-      self.data[q]["celery_worker_busyness"] = divide(self.data[q]["reserved"]+self.data[q]["active"], self.data[q]["prefetch"]+self.data[q]["concurrency"])
+      try:
+        self.data[q]["celery_worker_busyness"] = divide(self.data[q]["reserved"]+self.data[q]["active"], self.data[q]["prefetch"]+self.data[q]["concurrency"])
+      except:
+        self.data[q]["celery_worker_busyness"] = Decimal(1)
       if (self.data[q].get("avgRestriction", Decimal(1)) > self.config.get("queues", {}).get(q, {}).get("scaleUpThreshold", Decimal(0.3))) and self.data[q]["consumers"] != None:
         self.data[q]["rabbitmq_hpa_scale_factor"] = divide(self.data[q]["consumers"]+self.config.get("queues", {}).get(q, {}).get("scaleAmount", 1), self.data[q]["consumers"])
       elif (self.data[q].get("avgBusyness", Decimal(1)) < self.config.get("queues", {}).get(q, {}).get("scaleDownThreshold", Decimal(0.5))) and self.data[q]["consumers"] != None:
