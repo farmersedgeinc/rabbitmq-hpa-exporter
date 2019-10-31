@@ -3,6 +3,15 @@ from decimal import *
 
 filters = ["celeryev.", "celery@", "amq.gen"]
 
+def divide(num1, num2):
+  try:
+    return num1/num2
+  except:
+    if num1 == num2:
+      return Decimal(1)
+    else:
+      return num1    
+
 class RabbitmqHpaCollector(object):
   def __init__(self, config):
     self.celery = getattr(__import__(config["celery"]["module"], fromlist=[config["celery"]["app"]]), config["celery"]["app"])
@@ -59,11 +68,11 @@ class RabbitmqHpaCollector(object):
         self.data[q]["rabbitmq_consumer_restriction"] = Decimal(1)-self.data[q]["utilisation"]
       except:
         self.data[q]["rabbitmq_consumer_restriction"] = Decimal(0)
-      self.data[q]["celery_worker_busyness"] = (self.data[q]["reserved"]+self.data[q]["active"])/(self.data[q]["prefetch"]+self.data[q]["concurrency"])
+      self.data[q]["celery_worker_busyness"] = divide(self.data[q]["reserved"]+self.data[q]["active"], self.data[q]["prefetch"]+self.data[q]["concurrency"])
       if (self.data[q].get("avgRestriction", Decimal(1)) > self.config.get("queues", {}).get(q, {}).get("scaleUpThreshold", Decimal(0.3))) and self.data[q]["consumers"] != None:
-        self.data[q]["rabbitmq_hpa_scale_factor"] = (self.data[q]["consumers"]+self.config.get("queues", {}).get(q, {}).get("scaleAmount", 1))/self.data[q]["consumers"]
+        self.data[q]["rabbitmq_hpa_scale_factor"] = divide(self.data[q]["consumers"]+self.config.get("queues", {}).get(q, {}).get("scaleAmount", 1), self.data[q]["consumers"])
       elif (self.data[q].get("avgBusyness", Decimal(1)) < self.config.get("queues", {}).get(q, {}).get("scaleDownThreshold", Decimal(0.5))) and self.data[q]["consumers"] != None:
-        self.data[q]["rabbitmq_hpa_scale_factor"] = (self.data[q]["consumers"]-self.config.get("queues", {}).get(q, {}).get("scaleAmount", 1))/self.data[q]["consumers"]
+        self.data[q]["rabbitmq_hpa_scale_factor"] = divide(self.data[q]["consumers"]-self.config.get("queues", {}).get(q, {}).get("scaleAmount", 1), self.data[q]["consumers"])
       else:
         self.data[q]["rabbitmq_hpa_scale_factor"] = Decimal(1)
 
