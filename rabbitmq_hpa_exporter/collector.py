@@ -53,8 +53,6 @@ class RabbitmqHpaCollector(object):
           self.data[name]["utilisation"] = Decimal(1)
         self.data[name]["consumers"] = Decimal(d["consumers"])
 
-    self.logger.debug("QUEUES: {}".format(qs))
-
     for key in queues:
       name = queues[key][0]["name"]
       # sometimes these queries don't have all the data needed, so better all or nothing
@@ -67,9 +65,9 @@ class RabbitmqHpaCollector(object):
         for k in ["active", "reserved", "prefetch", "concurrency"]:
           del self.data[name][k]
 
-    for r in avgRestriction["data"]["result"]:
+    for r in avgRestriction["data"]["result"] if r["metric"]["queue"] in self.data:
       self.data[r["metric"]["queue"]]["avgRestriction"] = Decimal(r["value"][1])
-    for r in avgBusyness["data"]["result"]:
+    for r in avgBusyness["data"]["result"] if r["metric"]["queue"] in self.data:
       self.data[r["metric"]["queue"]]["avgBusyness"] = Decimal(r["value"][1])
 
     for q in self.data:
