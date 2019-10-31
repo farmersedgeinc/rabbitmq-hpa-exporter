@@ -57,10 +57,15 @@ class RabbitmqHpaCollector(object):
 
     for key in queues:
       name = queues[key][0]["name"]
-      self.data[name]["active"] += len(active[key])
-      self.data[name]["reserved"] += len(reserved[key])
-      self.data[name]["prefetch"] += stats[key]["prefetch_count"]
-      self.data[name]["concurrency"] += stats[key]["pool"]["max-concurrency"]
+      # sometimes these queries don't have all the data needed, so better all or nothing
+      try:
+        self.data[name]["active"] += len(active[key])
+        self.data[name]["reserved"] += len(reserved[key])
+        self.data[name]["prefetch"] += stats[key]["prefetch_count"]
+        self.data[name]["concurrency"] += stats[key]["pool"]["max-concurrency"]
+      except:
+        for k in ["active", "reserved", "prefetch", "concurrency"]:
+          del self.data[name][k]
 
     for r in avgRestriction["data"]["result"]:
       self.data[r["metric"]["queue"]]["avgRestriction"] = Decimal(r["value"][1])
