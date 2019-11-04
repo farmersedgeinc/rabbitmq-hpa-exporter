@@ -48,12 +48,15 @@ class RabbitmqHpaCollector(object):
       if not any(f in name for f in filters):
         if name not in self.data:
           self.data[name] = {}
-        tempData[name] = {"reserved": Decimal(0), "active": Decimal(0), "prefetch": Decimal(0), "concurrency": Decimal(0)}
+        tempData[name] = {"reserved": Decimal(0), "active": Decimal(0), "prefetch": Decimal(0), "concurrency": Decimal(0)}        
         try:
           self.data[name]["consumers"] = Decimal(d["consumers"])
         except:
           self.data[name]["consumers"] = None
-        self.data[name]["ready"] = Decimal(d["messages_ready"])
+        try:
+          self.data[name]["ready"] = Decimal(d["messages_ready"])
+        except:
+          pass
 
     for key in queues:
       name = queues[key][0]["name"]
