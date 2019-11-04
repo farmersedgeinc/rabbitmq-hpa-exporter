@@ -8,7 +8,7 @@ def getMetrics():
     "celery_worker_busyness": GaugeMetricFamily("celery_worker_busyness",
                                                 "Celery worker busyness from 0 to 1",
                                                 labels=['queue']),
-    "rabbitmq_consumer_restriction": GaugeMetricFamily("rabbitmq_consumer_restriction",
-                                                       "Reverse of consumer utilization - how often consumers cannot fetch more messages from 0 to 1",
-                                                       labels=['queue'])
+    "rabbitmq_ready_capacity_ratio": GaugeMetricFamily("rabbitmq_ready_capacity_ratio",
+                                                      "Ratio of ready messages to current worker message capacity",
+                                                      labels=['queue'])
   }
