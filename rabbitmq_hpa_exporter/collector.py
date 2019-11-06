@@ -40,7 +40,7 @@ class RabbitmqHpaCollector(object):
 
     rabbitStats = json.loads(requests.get(self.rabbitmq["host"], auth=self.rabbitmq["auth"]).content)
 
-    avgRatio = json.loads(requests.get(self.prometheus["host"], auth=self.prometheus["auth"], params={"query": "avg_over_time(rabbitmq_ready_capacity_ratio{}[2m])"}).content)
+    avgAvailability = json.loads(requests.get(self.prometheus["host"], auth=self.prometheus["auth"], params={"query": "avg_over_time(rabbitmq_consumer_availability{}[30s])"}).content)
     avgBusyness = json.loads(requests.get(self.prometheus["host"], auth=self.prometheus["auth"], params={"query": "avg_over_time(celery_worker_busyness{}[2m])"}).content)
 
     for d in rabbitStats:
@@ -54,9 +54,13 @@ class RabbitmqHpaCollector(object):
         except:
           self.data[name]["consumers"] = None
         try:
-          self.data[name]["ready"] = Decimal(d["messages_ready"])
+          self.data[name]["availability"] = Decimal(d["consumer_utilisation"])
         except:
-          pass
+          self.data[name]["availability"] = Decimal(1)
+        # try:
+        #   self.data[name]["ready"] = Decimal(d["messages_ready"])
+        # except:
+        #   pass
 
     for key in queues:
       name = queues[key][0]["name"]
@@ -73,23 +77,20 @@ class RabbitmqHpaCollector(object):
     for name in tempData:
       self.data[name].update(tempData[name])
 
-    for r in avgRatio["data"]["result"]:
+    for r in avgAvailability["data"]["result"]:
       if r["metric"]["queue"] in self.data:
-        self.data[r["metric"]["queue"]]["avgRatio"] = Decimal(r["value"][1])
+        self.data[r["metric"]["queue"]]["avgAvailability"] = Decimal(r["value"][1])
     for r in avgBusyness["data"]["result"]:
       if r["metric"]["queue"] in self.data:
         self.data[r["metric"]["queue"]]["avgBusyness"] = Decimal(r["value"][1])
 
     for q in self.data:
-      try:
-        self.data[q]["rabbitmq_ready_capacity_ratio"] = self.data[q]["ready"]/(self.data[q]["prefetch"]+self.data[q]["concurrency"])
-      except:
-        self.data[q]["rabbitmq_ready_capacity_ratio"] = Decimal(0)
+      self.data[q]["rabbitmq_consumer_availability"] = self.data[q]["availability"]
       try:
         self.data[q]["celery_worker_busyness"] = divide(self.data[q]["reserved"]+self.data[q]["active"], self.data[q]["prefetch"]+self.data[q]["concurrency"])
       except:
         self.data[q]["celery_worker_busyness"] = Decimal(1)
-      if (self.data[q].get("avgRatio", Decimal(0)) > self.config.get("queues", {}).get(q, {}).get("scaleUpThreshold", Decimal(1))) and self.data[q]["consumers"] != None:
+      if (self.data[q].get("avgAvailability", Decimal(0)) < self.config.get("queues", {}).get(q, {}).get("scaleUpThreshold", Decimal(0.5))) and self.data[q]["consumers"] != None:
         self.data[q]["rabbitmq_hpa_scale_factor"] = divide(self.data[q]["consumers"]+self.config.get("queues", {}).get(q, {}).get("scaleAmount", 1), self.data[q]["consumers"])
       elif (self.data[q].get("avgBusyness", Decimal(1)) < self.config.get("queues", {}).get(q, {}).get("scaleDownThreshold", Decimal(0.5))) and self.data[q]["consumers"] != None:
         self.data[q]["rabbitmq_hpa_scale_factor"] = divide(self.data[q]["consumers"]-self.config.get("queues", {}).get(q, {}).get("scaleAmount", 1), self.data[q]["consumers"])
